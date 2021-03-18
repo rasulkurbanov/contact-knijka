@@ -5,7 +5,21 @@ const { check, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken')
 const config = require('config')
 const bcrypt = require('bcryptjs')
+const auth = require('../middlewares/auth')
 
+
+//@route GET api/auth
+//@desc Get logged user
+//access Private
+router.get('/', auth, async (req, res) => {
+  try {
+    let user = await User.findById(req.user.id).select('-password')
+    res.status(200).send(user)
+  }
+  catch(err){
+    res.status(400).send('Invalid token')
+  }
+})
 
 
 //@route POST api/auth
@@ -20,15 +34,12 @@ router.post('/',
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() })
     }
-
     const { email, password } = req.body
-
 
     try {
       let user = await User.findOne({ email })
 
       if (!user) return res.status(400).send('Invalid credentials')
-
 
       const isMatch = await bcrypt.compare(password, user.password)
 
@@ -53,24 +64,14 @@ router.post('/',
           res.send({ token: token })
         }
       )
-
-
     }
     catch (err) {
       console.log(err)
       res.status(500).json({ error: err.message })
     }
-
-
   })
 
 
-//@route GET api/auth
-//@desc Get logged user
-//access Private
-router.get('/', (req, res) => {
-  res.send('Get logged user')
-})
 
 module.exports = router
 
