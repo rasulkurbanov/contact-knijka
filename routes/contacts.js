@@ -5,7 +5,7 @@ const router = express.Router()
 //@route GET api/contacts
 //@desc  Get an authenticated user contacts
 //@access Private
-router.get('/', (req, res) => {
+router.get('/', auth, (req, res) => {
   res.send('Get logged user saved contacts')
 })
 
